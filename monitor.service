@@ -1,0 +1,11 @@
+[Unit]
+Description=Poll solar inverter output
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=exec
+ExecStart=/home/pi/services/monitor.py
+
+[Install]
+WantedBy=multi-user.target graphic.target
