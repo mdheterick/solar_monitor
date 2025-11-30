@@ -1,8 +1,11 @@
 #! /usr/bin/python3 -u
 from datetime import datetime, date, time
 from aiohttp import web
+from dotenv import load_dotenv
 import json
 import os
+
+load_dotenv()
 
 services_dir = os.environ["services_dir"]
 
