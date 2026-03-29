@@ -53,6 +53,9 @@ def get_current_power(url):
         return power
 
 def check_address(address):
+    ping_result = subprocess.run(["ping", "-c 1", address], capture_output=True, text=True, check=False)
+    if ping_result.returncode != 0:
+        return False
     result = subprocess.run(["arp", address], capture_output=True, text=True, check=True)
     return inverter_mac_address in result.stdout
 
