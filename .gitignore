@@ -25,3 +25,4 @@ dmypy.json
 .vscode/
 
 solar.db
+.env

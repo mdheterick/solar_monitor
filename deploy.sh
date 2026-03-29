@@ -1,8 +1,5 @@
-pushd client
-npm run build
-popd
-scp -r ./client/dist pi@192.168.4.55:~/services/client/
-scp server.py pi@192.168.4.55:~/services/
-ssh pi@192.168.4.55 "sed -i 's/\r$//' services/server.py"
-scp monitor.py pi@192.168.4.55:~/services/
-ssh pi@192.168.4.55 "sed -i 's/\r$//' services/monitor.py"
+git pull --rebase
+cp monitor.py ../services
+cp server.py ../services
+systemctl --user restart monitor.service
+systemctl --user restart solar_server.service
