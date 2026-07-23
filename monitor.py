@@ -3,17 +3,11 @@ import urllib.request
 import json
 import sqlite3
 import time
-import os
-import subprocess
-import ipaddress
-
-services_dir = os.environ["services_dir"]
-inverter_mac_address = os.environ["inverter_mac_address"]
-search_network = ipaddress.IPv4Network(os.environ["search_network"])
+import env
 
 
 def initialise_database():
-    connection = sqlite3.connect(services_dir + "solar.db")
+    connection = sqlite3.connect(env.services_dir + "solar.db")
     cursor = connection.cursor()
     cursor.execute("CREATE TABLE IF NOT EXISTS solar(timestamp INT, power INT)")
     connection.commit()
@@ -27,7 +21,7 @@ class SolarMonitorDatabase:
         self.table = table
 
     def __enter__(self):
-        self.connection = sqlite3.connect(services_dir + self.database)
+        self.connection = sqlite3.connect(env.services_dir + self.database)
         self.cursor = self.connection.cursor()
         return self
     
@@ -52,31 +46,15 @@ def get_current_power(url):
             power += inverter["P"]
         return power
 
-def check_address(address):
-    ping_result = subprocess.run(["ping", "-c 1", address], capture_output=True, text=True, check=False)
-    if ping_result.returncode != 0:
-        return False
-    result = subprocess.run(["arp", address], capture_output=True, text=True, check=True)
-    return inverter_mac_address in result.stdout
-
 if __name__ == "__main__":
     initialise_database()
-    inverter_ip_address = search_network.network_address
     while True:
         try:
             try:
-                if check_address(inverter_ip_address.compressed):
-                    p = get_current_power(f"http://{inverter_ip_address.compressed}/solar_api/v1/GetPowerFlowRealtimeData.fcgi")
-                    entry = (time.time(), p)
-                    insert_solar_reading(entry)
-                    print(entry)
-                else:
-                    for address in search_network:
-                        print(f"Searching for inverter {address}")
-                        if check_address(address.compressed):
-                            inverter_ip_address = address
-                            print(f"Found inverter at {inverter_ip_address.compressed}")
-                            break
+                p = get_current_power(f"http://{env.inverter_ip_address}/solar_api/v1/GetPowerFlowRealtimeData.fcgi")
+                entry = (time.time(), p)
+                insert_solar_reading(entry)
+                print(entry)
             except Exception as e:
                 print("Exception: ", e)
             time.sleep(5)

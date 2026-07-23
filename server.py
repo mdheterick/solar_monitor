@@ -1,13 +1,7 @@
 #! /usr/bin/python3 -u
 from datetime import datetime, date, time
 from aiohttp import web
-from dotenv import load_dotenv
-import json
-import os
-
-load_dotenv()
-
-services_dir = os.environ["services_dir"]
+import env
 
 import monitor
 # web server to read entries from db
@@ -28,7 +22,7 @@ def filter_results(data, granularity):
     return result
 
 def index(request):
-    return web.FileResponse(services_dir + 'client/dist/index.html')
+    return web.FileResponse(env.services_dir + '/client/dist/index.html')
 
 def get_between(start: float, end: float):
     with monitor.SolarMonitorDatabase() as db:
@@ -56,7 +50,7 @@ app.add_routes([
     web.get("/", index),
     web.get("/today", get_today),
     web.get("/solar/day/{date}", get_day_solar),
-    web.static("/", services_dir + "client/dist/"),
+    web.static("/", env.services_dir + "/client/dist/"),
 ])
 
 web.run_app(app)
