@@ -1,10 +1,8 @@
-#! /usr/bin/python3 -u
+
 from datetime import datetime, date, time
 from aiohttp import web
-import env
 
-import monitor
-# web server to read entries from db
+from solar import monitor
 
 CORS_HEADERS = {
     "Access-Control-Allow-Origin": "*",
@@ -21,8 +19,6 @@ def filter_results(data, granularity):
             result.append([timestamp, reading])
     return result
 
-def index(request):
-    return web.FileResponse(env.services_dir + '/client/dist/index.html')
 
 def get_between(start: float, end: float):
     with monitor.SolarMonitorDatabase() as db:
@@ -44,13 +40,7 @@ def get_day_solar(request):
 
     return get_between(start_of_day, end_of_day)
 
-
-app = web.Application()
-app.add_routes([
-    web.get("/", index),
+routes = [
     web.get("/today", get_today),
     web.get("/solar/day/{date}", get_day_solar),
-    web.static("/", env.services_dir + "/client/dist/"),
-])
-
-web.run_app(app)
+]
